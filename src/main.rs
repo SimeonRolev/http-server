@@ -1,10 +1,10 @@
+#![windows_subsystem = "windows"]
+
 extern crate futures;
 extern crate http;
 extern crate hyper;
 extern crate hyper_staticfile;
-extern crate nix;
 extern crate webbrowser;
-pub extern crate libc;
 
 // This example serves the docs from `target/doc/`.
 //
@@ -15,7 +15,6 @@ use futures::{Async::*, Future, Poll, future};
 use http::response::Builder as ResponseBuilder;
 use http::{Request, Response, StatusCode, header};
 use hyper::Body;
-use nix::unistd::{fork, ForkResult};
 use hyper_staticfile::{Static, StaticFuture};
 use std::path::Path;
 use std::io::Error;
@@ -82,23 +81,15 @@ impl hyper::service::Service for MainService {
 
 /// Application entry point.
 fn main() {
-    match fork() {
-        Ok(ForkResult::Parent { child, .. }) => {
-            println!("Continuing execution in parent process, new child has pid: {}", child);
-        }
-        Ok(ForkResult::Child) => {
-            let addr = ([127, 0, 0, 1], 0).into();
-            let server = hyper::Server::bind(&addr)
-                .serve(|| future::ok::<_, Error>(MainService::new()));
+    let addr = ([127, 0, 0, 1], 0).into();
+    let server = hyper::Server::bind(&addr)
+        .serve(|| future::ok::<_, Error>(MainService::new()));
 
-            let bound = server.local_addr();
-            let server_url = format!("http://{}:{}", bound.ip(), bound.port());
-            eprintln!("Doc server running on {}", server_url);
-            
-            let url = format!("{}/index.html", server_url);
-            webbrowser::open(&url).expect("Error opening url");
-            hyper::rt::run(server.map_err(|e| eprintln!("server error: {}", e)));
-        },
-        Err(_) => println!("Fork failed"),
-    }
+    let bound = server.local_addr();
+    let server_url = format!("http://{}:{}", bound.ip(), bound.port());
+    eprintln!("Doc server running on {}", server_url);
+    
+    let url = format!("{}/index.html", server_url);
+    webbrowser::open(&url).expect("Error opening url");
+    hyper::rt::run(server.map_err(|e| eprintln!("server error: {}", e)));
 }
