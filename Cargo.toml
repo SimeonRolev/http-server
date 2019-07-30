@@ -3,6 +3,13 @@ name = "http-server"
 version = "0.1.0"
 authors = ["Yavor Atov <yavor.atov@gmail.com>"]
 edition = "2018"
+description = "An example application."
+
+
+[package.metadata.bundle]
+name = "HttpServer"
+identifier = "com.doe.exampleapplication"
+
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
@@ -12,3 +19,5 @@ futures = "0.1.28"
 http = "0.1.17"
 hyper = "0.12.33"
 webbrowser = "0.5.1"
+nix = "0.14.1"
+libc = "0.2.60"
